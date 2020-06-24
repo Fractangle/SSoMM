@@ -7,6 +7,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.text.StringTextComponent;
@@ -16,15 +17,31 @@ import javax.annotation.Nonnull;
 
 public class MysteriousMysteryItem extends Item {
     protected static final String MYSTERY_TAG_NAME = SSoMM.MOD_ID + ":mysterious_mystery";
+    protected static final int COORD_MAX_DIST = 16;
     
     public MysteriousMysteryItem(Properties properties) {
         super(properties);
     }
     
-    public static CompoundNBT generateMysteryNBT() {
+    public static CompoundNBT generateNewMysteryNBT(@Nonnull World world, PlayerEntity player) {
         CompoundNBT nbt = new CompoundNBT();
-        
+        nbt.putByte("stepsCompleted", (byte) 0);
+        nbt.put("step", generateStep(world, player));
         return nbt;
+    }
+    
+    public static CompoundNBT generateStep(@Nonnull World world, PlayerEntity player) {
+        CompoundNBT step = new CompoundNBT();
+        ListNBT conditions = new ListNBT();
+        
+        CompoundNBT coord = new CompoundNBT();
+        coord.putInt("x", (int)player.getPosX() + random.nextInt(COORD_MAX_DIST*2) - COORD_MAX_DIST);
+        coord.putInt("z", (int)player.getPosZ() + random.nextInt(COORD_MAX_DIST*2) - COORD_MAX_DIST);
+        conditions.add(coord);
+        
+        step.put("conditions", conditions);
+        
+        return step;
     }
     
     @Override
@@ -35,11 +52,12 @@ public class MysteriousMysteryItem extends Item {
         
         if(nbt != null && nbt.contains(MYSTERY_TAG_NAME)) {
             if(world.isRemote) {
+                player.sendMessage(new StringTextComponent(nbt.toString()));
                 Minecraft.getInstance().displayGuiScreen(new MysteriousMysteryScreen(mystery));
             }
         } else {
             if(!world.isRemote) {
-                mystery.getOrCreateTag().put(MYSTERY_TAG_NAME, generateMysteryNBT());
+                mystery.getOrCreateTag().put(MYSTERY_TAG_NAME, generateNewMysteryNBT(world, player));
             } else {
                 player.sendMessage(new StringTextComponent("Your Mysterious Mystery wasn't initialized. Now it is. Try again."));
             }
