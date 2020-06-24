@@ -1,12 +1,12 @@
 package fractangle.ssomm.client.gui;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import fractangle.ssomm.SSoMM;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
-import org.lwjgl.opengl.GL11;
 
 public class MysteriousMysteryScreen extends Screen {
     private static final ResourceLocation BACKGROUND_TEXTURE = new ResourceLocation(SSoMM.MOD_ID + ":textures/gui/mysterious_mystery.png");
@@ -14,9 +14,16 @@ public class MysteriousMysteryScreen extends Screen {
     
     public int x, y, xPad, yPad, xSize, ySize, xContent, yContent;
     
-    public MysteriousMysteryScreen(final String text) {
+    public MysteriousMysteryScreen(final ItemStack mystery) {
         super(NarratorChatListener.EMPTY);
-        this.text = text;
+        this.text = textFromNBT(mystery.getTag());
+    }
+    
+    protected String textFromNBT(CompoundNBT tag) {
+        if(tag == null) {
+            return "ERROR: Uninitialized mystery somehow made a GUI! This should never happen. Yell at Fractangle.";
+        }
+        return "placeholder";
     }
     
     @Override
