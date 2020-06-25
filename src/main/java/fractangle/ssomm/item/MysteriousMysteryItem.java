@@ -65,12 +65,6 @@ public class MysteriousMysteryItem extends Item {
                 player.sendMessage(new StringTextComponent(nbt.toString()));
                 Minecraft.getInstance().displayGuiScreen(new MysteriousMysteryScreen(mystery));
             }
-        } else { // This probably never happens now that I have inventoryTick(), but better safe than sorry
-            if(!world.isRemote) {
-                mystery.getOrCreateTag().put(MYSTERY_TAG_NAME, generateNewMysteryNBT(world, player));
-            } else {
-                player.sendMessage(new StringTextComponent("Your Mysterious Mystery wasn't initialized. Now it is. Try again."));
-            }
         }
         
         return ActionResult.resultSuccess(mystery);
