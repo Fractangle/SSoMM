@@ -24,7 +24,7 @@ displayName="Secret Society of Mysterious Mysteries" #mandatory
 # A file name (in the root of the mod JAR) containing a logo for display
 logoFile="ssomm.png" #optional
 # A text field displayed in the mod UI
-########credits="Thanks for this example mod goes to Java" #optional
+credits="Thanks to all the open-source modders whose code gave me good examples to learn from: Vazkii, williewillus, Cadiboo, and countless others!" #optional
 # A text field displayed in the mod UI
 authors="Fractangle" #optional
 # The description text for the mod (multi line!) (#mandatory)

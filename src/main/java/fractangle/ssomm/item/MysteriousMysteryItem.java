@@ -3,6 +3,7 @@ package fractangle.ssomm.item;
 import fractangle.ssomm.SSoMM;
 import fractangle.ssomm.client.gui.MysteriousMysteryScreen;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -45,6 +46,15 @@ public class MysteriousMysteryItem extends Item {
     }
     
     @Override
+    public void inventoryTick(ItemStack mystery, @Nonnull World world, @Nonnull Entity entity, int itemSlot, boolean isSelected) {
+        if(!mystery.hasTag() && entity instanceof PlayerEntity) {
+            if(!world.isRemote) {
+                mystery.getOrCreateTag().put(MYSTERY_TAG_NAME, generateNewMysteryNBT(world, (PlayerEntity) entity));
+            }
+        }
+    }
+    
+    @Override
     @Nonnull
     public ActionResult<ItemStack> onItemRightClick(@Nonnull World world, PlayerEntity player, @Nonnull Hand hand) {
         ItemStack mystery = player.getHeldItem(hand);
@@ -55,7 +65,7 @@ public class MysteriousMysteryItem extends Item {
                 player.sendMessage(new StringTextComponent(nbt.toString()));
                 Minecraft.getInstance().displayGuiScreen(new MysteriousMysteryScreen(mystery));
             }
-        } else {
+        } else { // This probably never happens now that I have inventoryTick(), but better safe than sorry
             if(!world.isRemote) {
                 mystery.getOrCreateTag().put(MYSTERY_TAG_NAME, generateNewMysteryNBT(world, player));
             } else {
