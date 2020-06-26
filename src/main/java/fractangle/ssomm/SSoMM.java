@@ -11,7 +11,7 @@ import org.apache.logging.log4j.Logger;
 @Mod(SSoMM.MOD_ID)
 public class SSoMM {
     public static final String MOD_ID = "ssomm";
-    private static final Logger PAUL_BUNYAN = LogManager.getLogger();
+    public static final Logger PAUL_BUNYAN = LogManager.getLogger();
     
     public SSoMM() {
         PAUL_BUNYAN.log(Level.DEBUG, "Your mysteriosity mysteriously increases!");
