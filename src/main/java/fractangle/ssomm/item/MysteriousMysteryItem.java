@@ -22,9 +22,9 @@ import org.apache.logging.log4j.Level;
 import javax.annotation.Nonnull;
 
 public class MysteriousMysteryItem extends Item {
-    protected static final String MYSTERY_TAG_NAME = SSoMM.MOD_ID + ":mysterious_mystery";
+    public static final String MYSTERY_TAG_NAME = SSoMM.MOD_ID + ":mysterious_mystery";
     protected static final String STEPS_COMPLETED = "stepsCompleted";
-    protected static final String CONDITIONS = "conditions";
+    public static final String CONDITIONS = "conditions";
     
     public MysteriousMysteryItem(Properties properties) {
         super(properties);

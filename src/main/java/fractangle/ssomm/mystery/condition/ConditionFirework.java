@@ -2,6 +2,7 @@ package fractangle.ssomm.mystery.condition;
 
 import fractangle.ssomm.SSoMM;
 import fractangle.ssomm.misc.WTFException;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.item.FireworkRocketEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -12,6 +13,7 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
@@ -36,23 +38,23 @@ public class ConditionFirework {
     public static final Field FIREWORK_ITEM_FIELD = ObfuscationReflectionHelper.findField(FireworkRocketEntity.class, FIREWORK_ITEM_SRG);
     
     public enum FireworkColor {
-        ERROR(-1, -1, SSoMM.MOD_ID + ".color_name.error"),
-        WHITE(0, 15790320, SSoMM.MOD_ID + ".color_name.white"),
-        ORANGE(1, 15435844, SSoMM.MOD_ID + ".color_name.orange"),
-        MAGENTA(2, 12801229, SSoMM.MOD_ID + ".color_name.magenta"),
-        LIGHT_BLUE(3, 6719955, SSoMM.MOD_ID + ".color_name.light_blue"),
-        YELLOW(4, 14602026, SSoMM.MOD_ID + ".color_name.yellow"),
-        LIME(5, 4312372, SSoMM.MOD_ID + ".color_name.lime"),
-        PINK(6, 14188952, SSoMM.MOD_ID + ".color_name.pink"),
-        GRAY(7, 4408131, SSoMM.MOD_ID + ".color_name.gray"),
-        LIGHT_GRAY(8, 11250603, SSoMM.MOD_ID + ".color_name.light_gray"),
-        CYAN(9, 2651799, SSoMM.MOD_ID + ".color_name.cyan"),
-        PURPLE(10, 8073150, SSoMM.MOD_ID + ".color_name.purple"),
-        BLUE(11, 2437522, SSoMM.MOD_ID + ".color_name.blue"),
-        BROWN(12, 5320730, SSoMM.MOD_ID + ".color_name.brown"),
-        GREEN(13, 3887386, SSoMM.MOD_ID + ".color_name.green"),
-        RED(14, 11743532, SSoMM.MOD_ID + ".color_name.red"),
-        BLACK(15, 1973019, SSoMM.MOD_ID + ".color_name.black");
+        ERROR(-1, -1, SSoMM.MOD_ID + ".color.error"),
+        WHITE(0, 15790320, SSoMM.MOD_ID + ".color.white"),
+        ORANGE(1, 15435844, SSoMM.MOD_ID + ".color.orange"),
+        MAGENTA(2, 12801229, SSoMM.MOD_ID + ".color.magenta"),
+        LIGHT_BLUE(3, 6719955, SSoMM.MOD_ID + ".color.light_blue"),
+        YELLOW(4, 14602026, SSoMM.MOD_ID + ".color.yellow"),
+        LIME(5, 4312372, SSoMM.MOD_ID + ".color.lime"),
+        PINK(6, 14188952, SSoMM.MOD_ID + ".color.pink"),
+        GRAY(7, 4408131, SSoMM.MOD_ID + ".color.gray"),
+        LIGHT_GRAY(8, 11250603, SSoMM.MOD_ID + ".color.light_gray"),
+        CYAN(9, 2651799, SSoMM.MOD_ID + ".color.cyan"),
+        PURPLE(10, 8073150, SSoMM.MOD_ID + ".color.purple"),
+        BLUE(11, 2437522, SSoMM.MOD_ID + ".color.blue"),
+        BROWN(12, 5320730, SSoMM.MOD_ID + ".color.brown"),
+        GREEN(13, 3887386, SSoMM.MOD_ID + ".color.green"),
+        RED(14, 11743532, SSoMM.MOD_ID + ".color.red"),
+        BLACK(15, 1973019, SSoMM.MOD_ID + ".color.black");
         
         private final int decimal, index;
         private final String unlocalizedColorName;
@@ -101,11 +103,11 @@ public class ConditionFirework {
     }
     
     public enum FireworkShape {
-        SMALL_BALL(0, SSoMM.MOD_ID + "firework_shape_name.small_ball"),
-        LARGE_BALL(1, SSoMM.MOD_ID + "firework_shape_name.large_ball"),
-        STAR(2, SSoMM.MOD_ID + "firework_shape_name.star"),
-        CREEPER(3, SSoMM.MOD_ID + "firework_shape_name.creeper"),
-        BURST(4, SSoMM.MOD_ID + "firework_shape_name.burst");
+        SMALL_BALL(0, SSoMM.MOD_ID + ".firework.shape.small_ball"),
+        LARGE_BALL(1, SSoMM.MOD_ID + ".firework.shape.large_ball"),
+        STAR(2, SSoMM.MOD_ID + ".firework.shape.star"),
+        CREEPER(3, SSoMM.MOD_ID + ".firework.shape.creeper"),
+        BURST(4, SSoMM.MOD_ID + ".firework.shape.burst");
         
         int index;
         String unlocalizedShapeName;
@@ -300,5 +302,60 @@ public class ConditionFirework {
             }
         }
         return false;
+    }
+    
+    public static String typeset(CompoundNBT condition) {
+        // Launch a red, green, and blue star-shaped firework that fades to orange and purple with trails and twinkling
+        // |______| |__________________| |_________| |______| |___________| |_______________| |__| |____| |_| |_______|
+        StringBuilder result = new StringBuilder();
+        result.append(I18n.format(SSoMM.MOD_ID+".firework.boilerplate.1")); // "Launch one"
+        result.append(" ");
+        result.append(buildColorString(condition.getList(COLORS, Constants.NBT.TAG_INT))); // [colors]
+        result.append(" ");
+        result.append(I18n.format(FireworkShape.getByIndex(condition.getInt(SHAPE)).getUnlocalizedShapeName())); // shape
+        result.append(I18n.format(SSoMM.MOD_ID+".firework.boilerplate.2")); // "-shaped firework"
+        if(condition.contains(FADE_COLORS)) {
+            result.append(" ");
+            result.append(I18n.format(SSoMM.MOD_ID+".firework.boilerplate.3")); // "that fades to"
+            result.append(" ");
+            result.append(buildColorString(condition.getList(FADE_COLORS, Constants.NBT.TAG_INT))); // [colors]
+        }
+        if(condition.contains(NEEDS_TRAIL)) {
+            result.append(" ");
+            result.append(I18n.format(SSoMM.MOD_ID+".firework.boilerplate.4")); // "with trails"
+            if(condition.contains(NEEDS_TWINKLE)) {
+                result.append(" ");
+                result.append(I18n.format(SSoMM.MOD_ID+".firework.boilerplate.5")); // "and twinkling"
+            }
+        } else {
+            if(condition.contains(NEEDS_TWINKLE)) {
+                result.append(" ");
+                result.append(I18n.format(SSoMM.MOD_ID+".firework.boilerplate.6")); // "with twinkling"
+            }
+        }
+        result.append(I18n.format(SSoMM.MOD_ID+".firework.boilerplate.7")); // "."
+    
+        return result.toString();
+    }
+    
+    private static String buildColorString(ListNBT colorNBT) {
+        switch(colorNBT.size()) {
+            case 1:
+                return I18n.format(FireworkColor.getByColorDecimal(((IntNBT)colorNBT.get(0)).getInt()).getUnlocalizedColorName());
+            case 2:
+                String colorLoc1 = I18n.format(FireworkColor.getByColorDecimal(((IntNBT)colorNBT.get(0)).getInt()).getUnlocalizedColorName());
+                String colorLoc2 = I18n.format(FireworkColor.getByColorDecimal(((IntNBT)colorNBT.get(1)).getInt()).getUnlocalizedColorName());
+                String and2 = I18n.format(SSoMM.MOD_ID+".firework.boilerplate.and");
+                return String.format("%s %s %s", colorLoc1, and2, colorLoc2);
+            case 3:
+                String colorLocA = I18n.format(FireworkColor.getByColorDecimal(((IntNBT)colorNBT.get(0)).getInt()).getUnlocalizedColorName());
+                String colorLocB = I18n.format(FireworkColor.getByColorDecimal(((IntNBT)colorNBT.get(1)).getInt()).getUnlocalizedColorName());
+                String colorLocC = I18n.format(FireworkColor.getByColorDecimal(((IntNBT)colorNBT.get(2)).getInt()).getUnlocalizedColorName());
+                String comma = I18n.format(SSoMM.MOD_ID+".firework.boilerplate.comma");
+                String and3 = I18n.format(SSoMM.MOD_ID+".firework.boilerplate.and");
+                return String.format("%s%s %s%s %s %s", colorLocA, comma, colorLocB, comma, and3, colorLocC);
+            default:
+                return I18n.format(SSoMM.MOD_ID+".color.error");
+        }
     }
 }

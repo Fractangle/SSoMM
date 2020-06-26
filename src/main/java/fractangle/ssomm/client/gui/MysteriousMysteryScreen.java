@@ -2,11 +2,19 @@ package fractangle.ssomm.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import fractangle.ssomm.SSoMM;
+import fractangle.ssomm.item.MysteriousMysteryItem;
+import fractangle.ssomm.mystery.condition.MysteryCondition;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.util.Constants;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MysteriousMysteryScreen extends Screen {
     private static final ResourceLocation BACKGROUND_TEXTURE = new ResourceLocation(SSoMM.MOD_ID + ":textures/gui/mysterious_mystery.png");
@@ -23,7 +31,18 @@ public class MysteriousMysteryScreen extends Screen {
         if(tag == null) {
             return "ERROR: Uninitialized mystery somehow made a GUI! This should never happen. Yell at Fractangle.";
         }
-        return "placeholder";
+        
+        CompoundNBT innerTag = tag.getCompound(MysteriousMysteryItem.MYSTERY_TAG_NAME);
+    
+        List<String> typesetConditions = new ArrayList<String>();
+        
+        ListNBT conditions = innerTag.getList(MysteriousMysteryItem.CONDITIONS, Constants.NBT.TAG_COMPOUND);
+        for(INBT conditionRaw : conditions) {
+            CompoundNBT condition = (CompoundNBT) conditionRaw;
+            typesetConditions.add(MysteryCondition.fromString(condition.getString(MysteryCondition.CONDITION_TYPE)).typeset(condition));
+        }
+        
+        return String.join("\n\n", typesetConditions);
     }
     
     @Override

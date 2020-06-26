@@ -9,20 +9,22 @@ import org.apache.logging.log4j.Level;
 import javax.annotation.Nonnull;
 
 public enum MysteryCondition {
-    INVALID((@Nonnull World world, @Nonnull PlayerEntity player) -> null, (CompoundNBT conditionData, @Nonnull World world, @Nonnull PlayerEntity player) -> false, "INVALID")
-    ,COORDINATE(ConditionCoordinate::get, ConditionCoordinate::isSatisfied, "coordinate")
-    ,FIREWORK(ConditionFirework::get, ConditionFirework::isSatisfied, "firework")
+    INVALID((@Nonnull World world, @Nonnull PlayerEntity player) -> null, (CompoundNBT conditionData, @Nonnull World world, @Nonnull PlayerEntity player) -> false, (CompoundNBT conditionData) -> "INVALID", "INVALID")
+    ,COORDINATE(ConditionCoordinate::get, ConditionCoordinate::isSatisfied, ConditionCoordinate::typeset, "coordinate")
+    ,FIREWORK(ConditionFirework::get, ConditionFirework::isSatisfied, ConditionFirework::typeset, "firework")
     ;
     
     public static final String CONDITION_TYPE = "conditionType";
     
     IGetNewNBT nbtMaker;
     ICheckSatisfaction satisfactionChecker;
+    IStringifyConditions typesetter;
     String tag;
     
-    MysteryCondition(IGetNewNBT nbtMaker, ICheckSatisfaction satisfactionChecker, String tag) {
+    MysteryCondition(IGetNewNBT nbtMaker, ICheckSatisfaction satisfactionChecker, IStringifyConditions typesetter, String tag) {
         this.nbtMaker = nbtMaker;
         this.satisfactionChecker = satisfactionChecker;
+        this.typesetter = typesetter;
         this.tag = tag;
     }
     
@@ -48,6 +50,10 @@ public enum MysteryCondition {
         return this.tag;
     }
     
+    public String typeset(CompoundNBT condition) {
+        return typesetter.typeset(condition);
+    }
+    
     @FunctionalInterface
     public interface IGetNewNBT {
         CompoundNBT get(@Nonnull World world, @Nonnull PlayerEntity player);
@@ -56,5 +62,10 @@ public enum MysteryCondition {
     @FunctionalInterface
     public interface ICheckSatisfaction {
         boolean isSatisfied(CompoundNBT conditionData, @Nonnull World world, @Nonnull PlayerEntity player);
+    }
+    
+    @FunctionalInterface
+    public interface IStringifyConditions {
+        String typeset(CompoundNBT conditionData);
     }
 }

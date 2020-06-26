@@ -35,4 +35,8 @@ public final class ConditionCoordinate {
         }
         return false;
     }
+    
+    public static String typeset(CompoundNBT condition) {
+        return "Go to x=" + condition.getInt(COORDINATE_X) + ", z=" + condition.getInt(COORDINATE_Z) + ".";
+    }
 }
