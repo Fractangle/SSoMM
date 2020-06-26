@@ -4,15 +4,23 @@ import fractangle.ssomm.SSoMM;
 import fractangle.ssomm.misc.WTFException;
 import net.minecraft.entity.item.FireworkRocketEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.IntNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import org.apache.logging.log4j.Level;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
@@ -25,6 +33,8 @@ public class ConditionFirework {
     public static final String SHAPE = "shape";
     public static final String COLORS = "colors";
     public static final String FADE_COLORS = "fadeColors";
+    public static final String FIREWORK_ITEM_SRG = "field_184566_a";
+    public static final Field FIREWORK_ITEM_FIELD = ObfuscationReflectionHelper.findField(FireworkRocketEntity.class, FIREWORK_ITEM_SRG);
     
     public enum FireworkColor {
         ERROR(-1, -1, SSoMM.MOD_ID + ".color_name.error"),
@@ -147,7 +157,7 @@ public class ConditionFirework {
         List<Integer> colorDecimals = new ArrayList<Integer>();
         int howManyColors = ThreadLocalRandom.current().nextInt(3) + 1;
         for(int i=0; i<howManyColors; i++) {
-            colorDecimals.add(possibleColors.remove(ThreadLocalRandom.current().nextInt(possibleColors.size())));
+            colorDecimals.add(FireworkColor.getByIndex(possibleColors.remove(ThreadLocalRandom.current().nextInt(possibleColors.size()))).getColorDecimal());
         }
         
         List<Integer> fadeColorDecimals = new ArrayList<Integer>();
@@ -158,7 +168,7 @@ public class ConditionFirework {
             }
             howManyColors = ThreadLocalRandom.current().nextInt(3) + 1;
             for(int i=0; i<howManyColors; i++) {
-                fadeColorDecimals.add(possibleColors.remove(ThreadLocalRandom.current().nextInt(possibleColors.size())));
+                fadeColorDecimals.add(FireworkColor.getByIndex(possibleColors.remove(ThreadLocalRandom.current().nextInt(possibleColors.size()))).getColorDecimal());
             }
         }
         
@@ -176,7 +186,9 @@ public class ConditionFirework {
         for(int color : fadeColorDecimals) {
             fadeColorsNBT.add(IntNBT.valueOf(color));
         }
-        condition.put(FADE_COLORS, fadeColorsNBT);
+        if(fadeColorsNBT.size() > 0) {
+            condition.put(FADE_COLORS, fadeColorsNBT);
+        }
         
         return condition;
     }
@@ -192,20 +204,102 @@ public class ConditionFirework {
         bz = player.getPosZ() + range;
         AxisAlignedBB boundingBox = new AxisAlignedBB(ax, ay, az, bx, by, bz);
         List<FireworkRocketEntity> rocketsLotsOfRockets = world.getEntitiesWithinAABB(FireworkRocketEntity.class, boundingBox, null);
+        boolean foundMatch;
         for(FireworkRocketEntity rocket : rocketsLotsOfRockets) {
-            Set<String> tags = rocket.getTags();
-            
-            if(player.isSneaking()) {
-                SSoMM.PAUL_BUNYAN.log(Level.DEBUG, "Rocket data: " + tags.size() + " tags");
-                for(String tag : tags) {
-                    SSoMM.PAUL_BUNYAN.log(Level.DEBUG, "\t" + tag);
-                }
+            foundMatch = false;
+            EntityDataManager rocketDataManager = rocket.getDataManager();
+            DataParameter<ItemStack> FIREWORK_ITEM;
+            FIREWORK_ITEM_FIELD.setAccessible(true);
+            try {
+                FIREWORK_ITEM = (DataParameter<ItemStack>) FIREWORK_ITEM_FIELD.get(rocket);
+            } catch(IllegalAccessException e) {
+                throw new WTFException("I literally just called setAccessible(true)");
             }
-            // twinkle
-            // trail
-            // shape
-            // colors
-            // fade colors
+            
+            CompoundNBT fireworkData = rocketDataManager.get(FIREWORK_ITEM).getTag();
+
+            if(fireworkData == null) return false;
+            SSoMM.PAUL_BUNYAN.log(Level.DEBUG, "Firework: " + fireworkData);
+            ListNBT explosions = fireworkData.getCompound("Fireworks").getList("Explosions", Constants.NBT.TAG_COMPOUND);
+
+            boolean needsTwinkle = conditionData.getBoolean(NEEDS_TWINKLE);
+            boolean needsTrail = conditionData.getBoolean(NEEDS_TRAIL);
+            int shape = conditionData.getByte(SHAPE);
+            ListNBT fadeColors = conditionData.getList(FADE_COLORS, Constants.NBT.TAG_INT);
+
+            for(INBT explosionRaw : explosions) {
+                CompoundNBT explosion = (CompoundNBT) explosionRaw;
+    
+                if(needsTwinkle && (!explosion.contains("Flicker") || explosion.getByte("Flicker") != 1)) {
+                    break;
+                }
+    
+                if(needsTrail && (!explosion.contains("Trail") || explosion.getByte("Trail") != 1)) {
+                    break;
+                }
+    
+                if(!explosion.contains("Type") || explosion.getByte("Type") != shape) {
+                    break;
+                }
+    
+                if(!explosion.contains("Colors")) {
+                    break;
+                } else {
+                    ListNBT requiredColorsNBT = conditionData.getList(COLORS, Constants.NBT.TAG_INT);
+                    int[] explosionColorsArray = explosion.getIntArray("Colors");
+                    Set<Integer> requiredColors = new HashSet<>();
+                    for(INBT colorRaw : requiredColorsNBT) {
+                        int color = ((IntNBT) colorRaw).getInt();
+                        requiredColors.add(color);
+                    }
+                    Set<Integer> explosionColors = new HashSet<>();
+                    for(int color : explosionColorsArray) {
+                        explosionColors.add(color);
+                    }
+                    for(int color : requiredColors) {
+                        if(!explosionColors.contains(color)) {
+                            break;
+                        }
+                    }
+                    for(int color : explosionColors) {
+                        if(!requiredColors.contains(color)) {
+                            break;
+                        }
+                    }
+                }
+    
+                if(!explosion.contains("FadeColors") && conditionData.contains(FADE_COLORS) && conditionData.getList(FADE_COLORS, Constants.NBT.TAG_INT).size() > 0) {
+                    break;
+                } else {
+                    ListNBT requiredColorsNBT = conditionData.getList(FADE_COLORS, Constants.NBT.TAG_INT);
+                    int[] explosionColorsArray = explosion.getIntArray("FadeColors");
+                    Set<Integer> requiredColors = new HashSet<>();
+                    for(INBT colorRaw : requiredColorsNBT) {
+                        int color = ((IntNBT) colorRaw).getInt();
+                        requiredColors.add(color);
+                    }
+                    Set<Integer> explosionColors = new HashSet<>();
+                    for(int color : explosionColorsArray) {
+                        explosionColors.add(color);
+                    }
+                    for(int color : requiredColors) {
+                        if(!explosionColors.contains(color)) {
+                            break;
+                        }
+                    }
+                    for(int color : explosionColors) {
+                        if(!requiredColors.contains(color)) {
+                            break;
+                        }
+                    }
+                }
+        
+                foundMatch = true;
+            }
+            
+            if(foundMatch) {
+                return true;
+            }
         }
         return false;
     }
