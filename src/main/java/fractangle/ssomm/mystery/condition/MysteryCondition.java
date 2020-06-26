@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
 public enum MysteryCondition {
     INVALID((@Nonnull World world, @Nonnull PlayerEntity player) -> null, (CompoundNBT conditionData, @Nonnull World world, @Nonnull PlayerEntity player) -> false, "INVALID")
     ,COORDINATE(ConditionCoordinate::get, ConditionCoordinate::isSatisfied, "coordinate")
-    //,FIREWORK()
+    ,FIREWORK(ConditionFirework::get, ConditionFirework::isSatisfied, "firework")
     ;
     
     public static final String CONDITION_TYPE = "conditionType";

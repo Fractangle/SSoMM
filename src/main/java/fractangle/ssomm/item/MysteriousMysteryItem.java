@@ -40,8 +40,11 @@ public class MysteriousMysteryItem extends Item {
     public static ListNBT generateStepConditions(@Nonnull World world, PlayerEntity player) {
         ListNBT conditions = new ListNBT();
         
-        CompoundNBT coordinate = MysteryCondition.COORDINATE.getRandom(world, player);
-        conditions.add(coordinate);
+        //CompoundNBT coordinate = MysteryCondition.COORDINATE.getRandom(world, player);
+        //conditions.add(coordinate);
+        
+        CompoundNBT firework = MysteryCondition.FIREWORK.getRandom(world, player);
+        conditions.add(firework);
         
         return conditions;
     }
