@@ -3,6 +3,7 @@ package fractangle.ssomm.item;
 import fractangle.ssomm.SSoMM;
 import fractangle.ssomm.client.gui.MysteriousMysteryScreen;
 import fractangle.ssomm.init.ModItems;
+import fractangle.ssomm.mystery.condition.MysteryCondition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -24,13 +25,6 @@ public class MysteriousMysteryItem extends Item {
     protected static final String MYSTERY_TAG_NAME = SSoMM.MOD_ID + ":mysterious_mystery";
     protected static final String STEPS_COMPLETED = "stepsCompleted";
     protected static final String CONDITIONS = "conditions";
-    protected static final String CONDITION_TYPE = "conditionType";
-    
-    protected static final int CONDITION_COORDINATE = 1;
-    protected static final String COORDINATE_X = "x";
-    protected static final String COORDINATE_Z = "z";
-    protected static final int COORDINATE_MAX_DIST = 16;
-    protected static final int COORDINATE_FUZZ_DIST = 1;
     
     public MysteriousMysteryItem(Properties properties) {
         super(properties);
@@ -46,10 +40,7 @@ public class MysteriousMysteryItem extends Item {
     public static ListNBT generateStepConditions(@Nonnull World world, PlayerEntity player) {
         ListNBT conditions = new ListNBT();
         
-        CompoundNBT coordinate = new CompoundNBT();
-        coordinate.putInt(CONDITION_TYPE, CONDITION_COORDINATE);
-        coordinate.putInt(COORDINATE_X, (int)player.getPosX() + random.nextInt(COORDINATE_MAX_DIST *2) - COORDINATE_MAX_DIST);
-        coordinate.putInt(COORDINATE_Z, (int)player.getPosZ() + random.nextInt(COORDINATE_MAX_DIST *2) - COORDINATE_MAX_DIST);
+        CompoundNBT coordinate = MysteryCondition.COORDINATE.getRandom(world, player);
         conditions.add(coordinate);
         
         return conditions;
@@ -60,48 +51,18 @@ public class MysteriousMysteryItem extends Item {
             SSoMM.PAUL_BUNYAN.log(Level.ERROR, "Somehow a Mysterious Mystery turned into something else... how mysterious!");
             return false;
         }
-        SSoMM.PAUL_BUNYAN.log(Level.DEBUG, "Checking conditions...");
         CompoundNBT mysteryNBT = stack.getChildTag(MYSTERY_TAG_NAME);
         if(mysteryNBT != null) {
             ListNBT conditions = mysteryNBT.getList(CONDITIONS, Constants.NBT.TAG_COMPOUND);
-            SSoMM.PAUL_BUNYAN.log(Level.DEBUG, "Found " + conditions.size() + " conditions");
             for (INBT rawCondition : conditions) {
-                SSoMM.PAUL_BUNYAN.log(Level.DEBUG, "Checking a condition: " + rawCondition.toString());
                 CompoundNBT condition = (CompoundNBT) rawCondition;
-                if (!isConditionSatisfied(condition, world, player)) {
+                String type = condition.getString(MysteryCondition.CONDITION_TYPE);
+                if(!MysteryCondition.fromString(type).isSatisfied(condition, world, player)) {
                     return false;
                 }
             }
             return true;
         }
-        return false;
-    }
-    
-    private static boolean isConditionSatisfied(CompoundNBT condition, @Nonnull World world, PlayerEntity player) {
-        int conditionType = condition.getInt(CONDITION_TYPE);
-        
-        switch(conditionType){
-            case CONDITION_COORDINATE:
-                return isCoordinateSatisfied(condition, player);
-            default:
-                SSoMM.PAUL_BUNYAN.log(Level.ERROR, "Attempted to check an unknown CONDITION_TYPE: " + conditionType);
-                return false;
-        }
-    }
-    
-    private static boolean isCoordinateSatisfied(CompoundNBT condition, PlayerEntity player) {
-        int cX, cZ;
-        double pX, pZ;
-        cX = condition.getInt(COORDINATE_X);
-        cZ = condition.getInt(COORDINATE_Z);
-        pX = player.getPosX();
-        pZ = player.getPosZ();
-        SSoMM.PAUL_BUNYAN.log(Level.DEBUG, "Checking coordinate condition...");
-        if(Math.hypot(pX-cX, pZ-cZ) < COORDINATE_FUZZ_DIST) {
-            SSoMM.PAUL_BUNYAN.log(Level.DEBUG, "Coordinate success!");
-            return true;
-        }
-        SSoMM.PAUL_BUNYAN.log(Level.DEBUG, "Coordinate failure!");
         return false;
     }
     
