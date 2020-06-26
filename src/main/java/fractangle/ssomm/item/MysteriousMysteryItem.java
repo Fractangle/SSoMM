@@ -76,8 +76,8 @@ public class MysteriousMysteryItem extends Item {
     @Override
     public void onCreated(@Nonnull ItemStack mystery, @Nonnull World world, @Nonnull PlayerEntity player) {
         super.onCreated(mystery, world, player);
-        if (!mystery.hasTag()) {
-            if (!world.isRemote) {
+        if (!world.isRemote) {
+            if (!mystery.hasTag()) {
                 mystery.getOrCreateTag().put(MYSTERY_TAG_NAME, generateNewMysteryNBT(world, player));
             }
         }
@@ -85,17 +85,15 @@ public class MysteriousMysteryItem extends Item {
     
     @Override
     public void inventoryTick(@Nonnull ItemStack mystery, @Nonnull World world, @Nonnull Entity entity, int itemSlot, boolean isSelected) {
-        if(entity instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity) entity;
-            
-            if (!mystery.hasTag()) { // This should never happen...? Pretty sure onCreated() fires before inventoryTick()
-                if (!world.isRemote) {
+        if (!world.isRemote) {
+            if(entity instanceof PlayerEntity) {
+                PlayerEntity player = (PlayerEntity) entity;
+                
+                if (!mystery.hasTag()) { // This should never happen...? Pretty sure onCreated() fires before inventoryTick()
                     mystery.getOrCreateTag().put(MYSTERY_TAG_NAME, generateNewMysteryNBT(world, player));
                 }
-            }
-            
-            if (areConditionsSatisfied(mystery, world, player)) {
-                if(!world.isRemote) {
+                
+                if (areConditionsSatisfied(mystery, world, player)) {
                     completeMysteryStep(mystery, world, player);
                 }
             }

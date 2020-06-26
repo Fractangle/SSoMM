@@ -226,7 +226,8 @@ public class ConditionFirework {
             boolean needsTrail = conditionData.getBoolean(NEEDS_TRAIL);
             int shape = conditionData.getByte(SHAPE);
             ListNBT fadeColors = conditionData.getList(FADE_COLORS, Constants.NBT.TAG_INT);
-
+            
+            checkExplosion:
             for(INBT explosionRaw : explosions) {
                 CompoundNBT explosion = (CompoundNBT) explosionRaw;
     
@@ -258,12 +259,12 @@ public class ConditionFirework {
                     }
                     for(int color : requiredColors) {
                         if(!explosionColors.contains(color)) {
-                            break;
+                            break checkExplosion;
                         }
                     }
                     for(int color : explosionColors) {
                         if(!requiredColors.contains(color)) {
-                            break;
+                            break checkExplosion;
                         }
                     }
                 }
@@ -284,12 +285,12 @@ public class ConditionFirework {
                     }
                     for(int color : requiredColors) {
                         if(!explosionColors.contains(color)) {
-                            break;
+                            break checkExplosion;
                         }
                     }
                     for(int color : explosionColors) {
                         if(!requiredColors.contains(color)) {
-                            break;
+                            break checkExplosion;
                         }
                     }
                 }
