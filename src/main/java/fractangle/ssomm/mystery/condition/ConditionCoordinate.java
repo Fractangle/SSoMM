@@ -1,10 +1,8 @@
 package fractangle.ssomm.mystery.condition;
 
-import fractangle.ssomm.SSoMM;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.World;
-import org.apache.logging.log4j.Level;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.ThreadLocalRandom;
@@ -32,12 +30,9 @@ public final class ConditionCoordinate {
         cZ = conditionData.getInt(COORDINATE_Z);
         pX = player.getPosX();
         pZ = player.getPosZ();
-        SSoMM.PAUL_BUNYAN.log(Level.DEBUG, "Checking coordinate condition...");
         if(Math.hypot(pX-cX, pZ-cZ) < COORDINATE_FUZZ_DIST) {
-            SSoMM.PAUL_BUNYAN.log(Level.DEBUG, "Coordinate success!");
             return true;
         }
-        SSoMM.PAUL_BUNYAN.log(Level.DEBUG, "Coordinate failure!");
         return false;
     }
 }

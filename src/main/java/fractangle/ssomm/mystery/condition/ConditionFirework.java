@@ -15,7 +15,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import org.apache.logging.log4j.Level;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
@@ -219,7 +218,6 @@ public class ConditionFirework {
             CompoundNBT fireworkData = rocketDataManager.get(FIREWORK_ITEM).getTag();
 
             if(fireworkData == null) return false;
-            SSoMM.PAUL_BUNYAN.log(Level.DEBUG, "Firework: " + fireworkData);
             ListNBT explosions = fireworkData.getCompound("Fireworks").getList("Explosions", Constants.NBT.TAG_COMPOUND);
 
             boolean needsTwinkle = conditionData.getBoolean(NEEDS_TWINKLE);
