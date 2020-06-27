@@ -3,6 +3,7 @@ package fractangle.ssomm.item;
 import fractangle.ssomm.SSoMM;
 import fractangle.ssomm.client.gui.MysteriousMysteryScreen;
 import fractangle.ssomm.init.ModItems;
+import fractangle.ssomm.misc.WTFException;
 import fractangle.ssomm.mystery.condition.MysteryCondition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -20,11 +21,16 @@ import net.minecraftforge.common.util.Constants;
 import org.apache.logging.log4j.Level;
 
 import javax.annotation.Nonnull;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class MysteriousMysteryItem extends Item {
     public static final String MYSTERY_TAG_NAME = SSoMM.MOD_ID + ":mysterious_mystery";
     protected static final String STEPS_COMPLETED = "stepsCompleted";
     public static final String CONDITIONS = "conditions";
+    
+    // For "Bring [thing] to [location]" steps
+    public static final MysteryCondition[] LOCATION_CONDITIONS = {MysteryCondition.COORDINATE};
+    public static final MysteryCondition[] BRING_CONDITIONS = {MysteryCondition.FIREWORK};
     
     public MysteriousMysteryItem(Properties properties) {
         super(properties);
@@ -40,13 +46,19 @@ public class MysteriousMysteryItem extends Item {
     public static ListNBT generateStepConditions(@Nonnull World world, PlayerEntity player) {
         ListNBT conditions = new ListNBT();
         
-        CompoundNBT coordinate = MysteryCondition.COORDINATE.getRandom(world, player);
-        conditions.add(coordinate);
+        switch(ThreadLocalRandom.current().nextInt(0)) {
+            case 0:
+                MysteryCondition locationCondition = LOCATION_CONDITIONS[ThreadLocalRandom.current().nextInt(LOCATION_CONDITIONS.length)];
+                CompoundNBT locationNBT = locationCondition.getRandom(world, player);
+                conditions.add(locationNBT);
         
-        CompoundNBT firework = MysteryCondition.FIREWORK.getRandom(world, player);
-        conditions.add(firework);
-        
-        return conditions;
+                MysteryCondition bringCondition = BRING_CONDITIONS[ThreadLocalRandom.current().nextInt(BRING_CONDITIONS.length)];
+                CompoundNBT bringNBT = bringCondition.getRandom(world, player);
+                conditions.add(bringNBT);
+                return conditions;
+            default:
+                throw new WTFException("Fractangle messed up the step-type switch statement, go yell at her on github");
+        }
     }
     
     private static boolean areConditionsSatisfied(ItemStack stack, @Nonnull World world, PlayerEntity player) {
