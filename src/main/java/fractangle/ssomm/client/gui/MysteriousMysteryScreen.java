@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MysteriousMysteryScreen extends Screen {
-    private static final ResourceLocation BACKGROUND_TEXTURE = new ResourceLocation(SSoMM.MOD_ID + ":textures/gui/mysterious_mystery.png");
+    private static final ResourceLocation BACKGROUND_TEXTURE = SSoMM.getGuiTexture("mysterious_mystery.png");
     private final String text;
     
     public int x, y, xPad, yPad, xSize, ySize, xContent, yContent;
