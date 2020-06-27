@@ -214,9 +214,13 @@ public class ConditionFirework {
             EntityDataManager rocketDataManager = rocket.getDataManager();
             DataParameter<ItemStack> FIREWORK_ITEM;
             try {
+                // Dear IntelliJ, I know more about this than Java's type system does. I even cover my ass later on. So please kindly shut up.
+                //noinspection unchecked
                 FIREWORK_ITEM = (DataParameter<ItemStack>) FIREWORK_ITEM_FIELD.get(rocket);
             } catch(IllegalAccessException e) {
                 throw new WTFException("findField() was supposed to make this accessible! *shakes fist at Forge*");
+            } catch(ClassCastException e) {
+                throw new WTFException("FireworkRocketEntity apparently changed the type of its FIREWORK_ITEM field...?");
             }
             
             CompoundNBT fireworkData = rocketDataManager.get(FIREWORK_ITEM).getTag();
