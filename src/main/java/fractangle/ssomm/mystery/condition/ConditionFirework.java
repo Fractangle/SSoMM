@@ -13,7 +13,6 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
@@ -150,20 +149,20 @@ public class ConditionFirework {
         
         int shape = FireworkShape.values()[ThreadLocalRandom.current().nextInt(FireworkShape.values().length)].getIndex();
         
-        List<Integer> possibleColors = new ArrayList<Integer>();
+        List<Integer> possibleColors = new ArrayList<>();
         for(int i=0; i<16; i++) {
             possibleColors.add(i);
         }
         
-        List<Integer> colorDecimals = new ArrayList<Integer>();
+        List<Integer> colorDecimals = new ArrayList<>();
         int howManyColors = ThreadLocalRandom.current().nextInt(3) + 1;
         for(int i=0; i<howManyColors; i++) {
             colorDecimals.add(FireworkColor.getByIndex(possibleColors.remove(ThreadLocalRandom.current().nextInt(possibleColors.size()))).getColorDecimal());
         }
         
-        List<Integer> fadeColorDecimals = new ArrayList<Integer>();
+        List<Integer> fadeColorDecimals = new ArrayList<>();
         if(ThreadLocalRandom.current().nextBoolean()) {
-            possibleColors = new ArrayList<Integer>();
+            possibleColors = new ArrayList<>();
             for(int i=0; i<16; i++) {
                 possibleColors.add(i);
             }
@@ -210,11 +209,10 @@ public class ConditionFirework {
             foundMatch = false;
             EntityDataManager rocketDataManager = rocket.getDataManager();
             DataParameter<ItemStack> FIREWORK_ITEM;
-            FIREWORK_ITEM_FIELD.setAccessible(true);
             try {
                 FIREWORK_ITEM = (DataParameter<ItemStack>) FIREWORK_ITEM_FIELD.get(rocket);
             } catch(IllegalAccessException e) {
-                throw new WTFException("I literally just called setAccessible(true)");
+                throw new WTFException("findField() was supposed to make this accessible! *shakes fist at Forge*");
             }
             
             CompoundNBT fireworkData = rocketDataManager.get(FIREWORK_ITEM).getTag();
@@ -225,7 +223,6 @@ public class ConditionFirework {
             boolean needsTwinkle = conditionData.getBoolean(NEEDS_TWINKLE);
             boolean needsTrail = conditionData.getBoolean(NEEDS_TRAIL);
             int shape = conditionData.getByte(SHAPE);
-            ListNBT fadeColors = conditionData.getList(FADE_COLORS, Constants.NBT.TAG_INT);
             
             checkExplosion:
             for(INBT explosionRaw : explosions) {

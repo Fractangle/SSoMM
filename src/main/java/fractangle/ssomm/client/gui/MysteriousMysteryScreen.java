@@ -34,7 +34,7 @@ public class MysteriousMysteryScreen extends Screen {
         
         CompoundNBT innerTag = tag.getCompound(MysteriousMysteryItem.MYSTERY_TAG_NAME);
     
-        List<String> typesetConditions = new ArrayList<String>();
+        List<String> typesetConditions = new ArrayList<>();
         
         ListNBT conditions = innerTag.getList(MysteriousMysteryItem.CONDITIONS, Constants.NBT.TAG_COMPOUND);
         for(INBT conditionRaw : conditions) {
