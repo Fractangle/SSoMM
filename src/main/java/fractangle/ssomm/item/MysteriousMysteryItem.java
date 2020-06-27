@@ -47,7 +47,7 @@ public class MysteriousMysteryItem extends Item {
         ListNBT conditions = new ListNBT();
         
         switch(ThreadLocalRandom.current().nextInt(0)) {
-            case 0:
+            case 0: // Go to [location]. Bring [things].
                 MysteryCondition locationCondition = LOCATION_CONDITIONS[ThreadLocalRandom.current().nextInt(LOCATION_CONDITIONS.length)];
                 CompoundNBT locationNBT = locationCondition.getRandom(world, player);
                 conditions.add(locationNBT);
