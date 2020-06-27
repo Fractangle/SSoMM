@@ -2,6 +2,9 @@ package fractangle.ssomm.mystery.condition;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.RayTraceContext;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
@@ -30,13 +33,20 @@ public final class ConditionCoordinate {
         cZ = conditionData.getInt(COORDINATE_Z);
         pX = player.getPosX();
         pZ = player.getPosZ();
-        if(Math.hypot(pX-cX, pZ-cZ) < COORDINATE_FUZZ_DIST) {
-            return true;
+        if(Math.hypot(pX-cX, pZ-cZ) > COORDINATE_FUZZ_DIST) {
+            return false;
         }
-        return false;
+        
+        Vec3d pos = player.getPositionVec();
+        BlockRayTraceResult trace = world.rayTraceBlocks(new RayTraceContext(pos, new Vec3d(pos.getX(), 256, pos.getZ()), RayTraceContext.BlockMode.OUTLINE, RayTraceContext.FluidMode.ANY, player));
+        if(trace.getType() != BlockRayTraceResult.Type.MISS) {
+            return false;
+        }
+        
+        return true;
     }
     
     public static String typeset(CompoundNBT condition) {
-        return "Go to x=" + condition.getInt(COORDINATE_X) + ", z=" + condition.getInt(COORDINATE_Z) + ".";
+        return "Meet our agent at x=" + condition.getInt(COORDINATE_X) + ", z=" + condition.getInt(COORDINATE_Z) + ", under open sky.";
     }
 }

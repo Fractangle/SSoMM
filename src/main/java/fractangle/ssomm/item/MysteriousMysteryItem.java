@@ -46,7 +46,7 @@ public class MysteriousMysteryItem extends Item {
     public static ListNBT generateStepConditions(@Nonnull World world, PlayerEntity player) {
         ListNBT conditions = new ListNBT();
         
-        switch(ThreadLocalRandom.current().nextInt(0)) {
+        switch(ThreadLocalRandom.current().nextInt(1)) {
             case 0: // Go to [location]. Bring [things].
                 MysteryCondition locationCondition = LOCATION_CONDITIONS[ThreadLocalRandom.current().nextInt(LOCATION_CONDITIONS.length)];
                 CompoundNBT locationNBT = locationCondition.getRandom(world, player);
