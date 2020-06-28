@@ -26,4 +26,8 @@ public class SSoMM {
     public static ResourceLocation getGuiTexture(String name) {
         return new ResourceLocation(MOD_ID, GUI_TEXTURE_DIR + name);
     }
+    
+    public static String getUnlocalizedName(String... parts) {
+        return SSoMM.MOD_ID + "." + String.join(".", parts);
+    }
 }
