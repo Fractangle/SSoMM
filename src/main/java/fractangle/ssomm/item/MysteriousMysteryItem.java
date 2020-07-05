@@ -38,7 +38,7 @@ public class MysteriousMysteryItem extends Item {
     
     public static CompoundNBT generateNewMysteryNBT(@Nonnull World world, PlayerEntity player) {
         CompoundNBT nbt = new CompoundNBT();
-        nbt.putByte(STEPS_COMPLETED, (byte) 0);
+        nbt.putInt(STEPS_COMPLETED, 0);
         nbt.put(CONDITIONS, generateStepConditions(world, player));
         return nbt;
     }
@@ -82,7 +82,18 @@ public class MysteriousMysteryItem extends Item {
     }
     
     private static void completeMysteryStep(@Nonnull ItemStack mystery, @Nonnull World world, @Nonnull PlayerEntity player) {
-        SSoMM.PAUL_BUNYAN.log(Level.DEBUG, "Ta-da, completed a mysterious mystery step");
+        if(!world.isRemote) {
+            SSoMM.PAUL_BUNYAN.log(Level.DEBUG, "Ta-da, completed a mysterious mystery step");
+            CompoundNBT tag = mystery.getTag();
+            if (tag != null) {
+                CompoundNBT mysteryTag = tag.getCompound(MYSTERY_TAG_NAME);
+                mysteryTag.put(CONDITIONS, generateStepConditions(world, player));
+                int steps = mysteryTag.getInt(STEPS_COMPLETED);
+                mysteryTag.putInt(STEPS_COMPLETED, steps+1);
+            } else {
+                throw new WTFException("How did we complete a mystery step that has no NBT tag?!");
+            }
+        }
     }
     
     @Override
